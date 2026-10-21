@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Plauer</title>
+  <meta name="description" content="Plauer: player de músicas do YouTube em liquid glass, com fila, pesquisa e modo offline.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://i.ytimg.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app">
+    <!-- Palco -->
+    <section class="stage" aria-label="Player">
+      <p class="net-pill liquid-glass" id="netPill" role="status" hidden>Offline</p>
+      <!-- Vídeo: visível no canto, a seta recolhe para fora do palco -->
+      <div class="video-dock" id="videoDock">
+        <button class="dock-tab glass-card" id="dockTab" aria-controls="dockFrame" aria-expanded="true" aria-label="Esconder vídeo" title="Esconder vídeo">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="dock-frame glass-card" id="dockFrame"><div id="yt"></div></div>
+      </div>
+      <div class="center">
+        <div class="device" id="device">
+          <div class="aura" aria-hidden="true"><img id="auraImg" alt="" crossorigin="anonymous"></div>
+
+          <aside class="drawer glass-card" id="drawer" aria-label="Fila">
+            <p class="drawer-title">Fila</p>
+            <ol class="queue" id="queueList"></ol>
+            <p class="queue-empty" id="queueEmpty">Fila vazia</p>
+          </aside>
+
+          <div class="body glass-card">
+            <div class="well empty" id="well">
+              <img id="wellImg" alt="" crossorigin="anonymous">
+              <p class="well-empty">Clique numa capa para tocar</p>
+              <button class="play liquid-glass liquid-glass--round" id="playBtn" aria-label="Tocar ou pausar">
+                <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z"/></svg>
+                <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4.2" height="14" rx="1.2"/><rect x="13.8" y="5" width="4.2" height="14" rx="1.2"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <button class="tab glass-card" id="tab" aria-controls="drawer" aria-expanded="false" aria-label="Abrir fila">
+            <span id="qCount">0</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+
+        <div class="meta">
+          <h1 class="title" id="title">Nada tocando</h1>
+          <p class="artist" id="artist">&nbsp;</p>
+        </div>
+
+        <div class="transport">
+          <div class="progress" id="progress" role="slider" tabindex="0" aria-label="Posição da música" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div class="progress-fill"></div>
+            <div class="progress-knob-track"><span class="progress-knob"></span></div>
+          </div>
+          <div class="controls">
+            <span class="time" id="timeCur">0:00</span>
+            <div class="buttons">
+              <button class="ctrl liquid-glass liquid-glass--round" id="prevBtn" aria-label="Reiniciar música">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="2.4" height="14" rx="1"/><path d="M19 6.2v11.6a1 1 0 0 1-1.52.85L9.6 13.7a1 1 0 0 1 0-1.7l7.88-4.95A1 1 0 0 1 19 6.2Z"/></svg>
+              </button>
+              <button class="ctrl liquid-glass liquid-glass--round" id="nextBtn" aria-label="Próxima da fila">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="16.6" y="5" width="2.4" height="14" rx="1"/><path d="M5 6.2v11.6a1 1 0 0 0 1.52.85l7.88-4.95a1 1 0 0 0 0-1.7L6.52 7.05A1 1 0 0 0 5 6.2Z"/></svg>
+              </button>
+              <button class="ctrl repeat liquid-glass liquid-glass--round" id="repeatBtn" aria-label="Repetir: desligado" aria-pressed="false" data-mode="off">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3l3 3-3 3M4 12v-1a5 5 0 0 1 5-5h11M7 21l-3-3 3-3M20 12v1a5 5 0 0 1-5 5H4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span class="one" aria-hidden="true">1</span>
+              </button>
+            </div>
+            <span class="time" id="timeDur">0:00</span>
+          </div>
+          <div class="volume-row">
+            <button class="mute liquid-glass liquid-glass--round" id="muteBtn" aria-label="Silenciar" data-level="high">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path class="spk" d="M4 9.5v5a1 1 0 0 0 1 1h3l4.3 3.6a1 1 0 0 0 1.7-.77V5.67a1 1 0 0 0-1.7-.77L8 8.5H5a1 1 0 0 0-1 1Z"/>
+                <path class="w1" d="M16.5 9.5a3.5 3.5 0 0 1 0 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path class="w2" d="M18.8 7a7 7 0 0 1 0 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path class="x" d="M17 9.5l4 5m0-5-4 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <div class="progress volume" id="volume" role="slider" tabindex="0" aria-label="Volume" aria-valuemin="0" aria-valuemax="100" aria-valuenow="80">
+              <div class="progress-fill"></div>
+              <div class="progress-knob-track"><span class="progress-knob"></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Biblioteca -->
+    <aside class="library glass-card" aria-label="Biblioteca">
+      <button class="add liquid-glass liquid-glass--round" id="addBtn" aria-label="Adicionar música">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+      <p class="lib-empty" id="libEmpty">Adicione sua primeira música</p>
+      <ul class="lib-list" id="libList"></ul>
+      <div class="lib-tools">
+        <button class="tool liquid-glass liquid-glass--round" id="exportBtn" aria-label="Exportar biblioteca" title="Exportar biblioteca">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 19h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="tool liquid-glass liquid-glass--round" id="importBtn" aria-label="Importar biblioteca" title="Importar biblioteca">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4m0 0L8 8m4-4 4 4M5 19h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <input type="file" id="importFile" accept="application/json,.json" hidden>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Modal adicionar -->
+  <dialog class="modal glass-card" id="addDialog" aria-labelledby="addTitle">
+    <form id="addForm" novalidate>
+      <h2 id="addTitle">Adicionar música</h2>
+      <label>
+        <span>Link ou pesquisa</span>
+        <input class="field liquid-glass" id="linkInput" type="search" enterkeyhint="search" autocomplete="off" spellcheck="false" placeholder="Cole um link ou pesquise uma música">
+      </label>
+      <p class="search-status" id="searchStatus" aria-live="polite"></p>
+      <ul class="results" id="results" aria-label="Resultados da pesquisa"></ul>
+      <label id="nameField">
+        <span>Nome</span>
+        <input class="field liquid-glass" id="nameInput" type="text" autocomplete="off" placeholder="Nome da música">
+      </label>
+      <p class="form-err" id="formErr" role="alert"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" id="cancelBtn">Fechar</button>
+        <button type="submit" class="btn liquid-glass" id="saveBtn">Adicionar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast liquid-glass" id="toast" role="status" aria-live="polite"></div>
+
+
+  <script src="app.js" defer></script>
+</body>
+</html>

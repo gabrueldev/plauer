@@ -1,0 +1,10 @@
+worker/
+projeto/
+wrangler.toml
+.assetsignore
+.wrangler/
+node_modules/
+.DS_Store
+.gitignore
+docs/
+README.md

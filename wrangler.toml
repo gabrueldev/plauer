@@ -1,0 +1,17 @@
+# Um Worker só: serve o site (arquivos desta pasta) e a busca em /search.
+# Deploy: `npx wrangler deploy` · Local: `npx wrangler dev` (http://localhost:8788)
+name = "plauer"
+main = "worker/index.js"
+compatibility_date = "2025-01-01"
+routes = [{ pattern = "plauer.gabrueldev.com", custom_domain = true }]
+
+[assets]
+directory = "."   # o que não deve subir está em .assetsignore
+
+[dev]
+port = 8788
+
+[vars]
+# Outros domínios que podem usar a busca, separados por vírgula.
+# O próprio site e o localhost já são liberados.
+ALLOWED_ORIGINS = ""
