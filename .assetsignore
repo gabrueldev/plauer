@@ -8,3 +8,5 @@ node_modules/
 .gitignore
 docs/
 README.md
+.git/
+.git
